@@ -25,7 +25,7 @@ jobs:
         env:
           FLET_NON_INTERACTIVE: "true"
         run: |
-          flet build apk --yes
+          flet build apk --include-packages cryptography,pillow --yes
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
