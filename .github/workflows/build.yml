@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,8 +29,11 @@ jobs:
         run: |
           flet build apk --yes
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - name: Create Release and Upload APK
+        uses: softprops/action-gh-release@v2
         with:
-          name: StegoSourus-APK
-          path: build/apk/*.apk
+          tag_name: v1.0.${{ github.run_number }}
+          name: StegoSourus v1.0.${{ github.run_number }}
+          files: build/apk/*.apk
+          draft: false
+          prerelease: false
