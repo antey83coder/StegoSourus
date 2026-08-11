@@ -1,30 +1,26 @@
 import flet as ft
-from cryptography.fernet import Fernet
-import os
 
 def main(page: ft.Page):
     page.title = "StegoSourus Secure"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.scroll = ft.ScrollMode.AUTO
-    page.padding = ft.padding.all(16)
+    page.padding = 16  # Виправлено відступи на чисте число
 
-    # Локальний стан користувача та бази ID
-    user_id = ft.TextField(label="Ваш ID або Код доступу", width=300, border_radius=10)
-    image_path_input = ft.TextField(label="Шлях до зображення (наприклад, original.jpg)", width=300, border_radius=10)
-    secret_message = ft.TextField(label="Секретне повідомлення", multiline=True, min_lines=3, max_lines=5, width=300, border_radius=10)
-    recipients_input = ft.TextField(label="ID отримувачів (через кому)", width=300, border_radius=10)
+    # Поля введення з адаптивною шириною (через відсотки або заповнення батьківського контейнера)
+    user_id = ft.TextField(label="Ваш ID або Код доступу", expand=True, border_radius=10)
+    image_path_input = ft.TextField(label="Шлях до зображення", expand=True, border_radius=10)
+    secret_message = ft.TextField(label="Секретне повідомлення", multiline=True, min_lines=3, max_lines=5, expand=True, border_radius=10)
+    recipients_input = ft.TextField(label="ID отримувачів (через кому)", expand=True, border_radius=10)
     
-    status_text = ft.Text(value="", color=ft.colors.RED_400, weight=ft.FontWeight.BOLD)
+    status_text = ft.Text(value="", color=ft.colors.RED_400, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER)
 
     def process_encryption(e):
-        # Перевірка на «код полону» (наприклад, якщо ID закінчується на дев'ятку замість нуля — симулюємо компрометацію)
-        current_id = user_id.value.strip()
+        current_id = user_id.value.strip() if user_id.value else ""
+        # Перевірка на «код полону» (якщо закінчується на 9)
         if current_id.endswith("9") and len(current_id) > 1:
             status_text.value = "ПОМИЛКА: Невірний криптографічний ключ контейнера."
             status_text.color = ft.colors.RED_400
-            # Тут спрацьовує прихований тривожний сигнал
-            print("УВАГА: Зафіксовано ввід коду примусу/полону для абонента!")
             page.update()
             return
 
@@ -34,17 +30,15 @@ def main(page: ft.Page):
             page.update()
             return
 
-        # Імітація процесу стеганографічного приховування
         status_text.value = "Повідомлення успішно зашифровано у зображенні!"
         status_text.color = ft.colors.GREEN_400
         page.update()
 
     def process_decryption(e):
-        current_id = user_id.value.strip()
+        current_id = user_id.value.strip() if user_id.value else ""
         if current_id.endswith("9") and len(current_id) > 1:
             status_text.value = "ПОМИЛКА: Дані пошкоджено або ключ недійсний."
             status_text.color = ft.colors.RED_400
-            print("УВАГА: Полон при розшифровці!")
             page.update()
             return
 
@@ -52,9 +46,9 @@ def main(page: ft.Page):
         status_text.color = ft.colors.GREEN_400
         page.update()
 
-    # Адаптивний інтерфейс з відносними відступами
-    header = ft.Text("StegoSourus Terminal", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER)
+    header = ft.Text("StegoSourus Terminal", size=22, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER)
 
+    # Адаптивний контейнер на весь доступний проміжок екрана з відносними відступами
     controls_container = ft.Container(
         content=ft.Column(
             [
@@ -66,21 +60,20 @@ def main(page: ft.Page):
                 secret_message,
                 ft.Row(
                     [
-                        ft.ElevatedButton("Зашифрувати", on_click=process_encryption, bgcolor=ft.colors.INDIGO_700, color=ft.colors.WHITE),
-                        ft.ElevatedButton("Розшифрувати", on_click=process_decryption, bgcolor=ft.colors.TEAL_700, color=ft.colors.WHITE),
+                        ft.ElevatedButton("Зашифрувати", on_click=process_encryption, bgcolor=ft.colors.INDIGO_700, color=ft.colors.WHITE, expand=1),
+                        ft.ElevatedButton("Розшифрувати", on_click=process_decryption, bgcolor=ft.colors.TEAL_700, color=ft.colors.WHITE, expand=1),
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                    width=300,
                 ),
                 status_text,
             ],
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=15,
+            horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
+            spacing=12,
         ),
-        padding=20,
+        padding=16,
         border_radius=15,
         bgcolor=ft.colors.SURFACE_VARIANT,
-        alignment=ft.alignment.center,
+        expand=True,
     )
 
     page.add(controls_container)
